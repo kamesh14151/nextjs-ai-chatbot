@@ -36,13 +36,24 @@
 
 ## Model Providers
 
-This template uses [OpenRouter](https://openrouter.ai/) to access multiple AI models through a unified interface. The default configuration includes OpenAI GPT-4O for "Grok Vision" and DeepSeek R1 for "Grok Reasoning" routed through OpenRouter.
+This template uses [Hugging Face](https://huggingface.co/) Router API with the **GLM-4.5-Air** model for both regular chat and advanced reasoning capabilities.
 
-### OpenRouter Authentication
+### Features
+- ✅ **Fast responses** - Optimized for speed
+- ✅ **Chain-of-thought reasoning** - Detailed step-by-step thinking
+- ✅ **Streaming support** - Real-time response generation
+- ✅ **OpenAI-compatible API** - Easy integration
 
-You need to provide an OpenRouter API key by setting the `OPENROUTER_API_KEY` environment variable in your `.env.local` file.
+### Hugging Face Authentication
 
-With the [AI SDK](https://ai-sdk.dev/docs/introduction), you can also switch to other providers like [Vercel AI Gateway](https://vercel.com/docs/ai-gateway), [OpenAI](https://openai.com), [Anthropic](https://anthropic.com), [Cohere](https://cohere.com/), and [many more](https://ai-sdk.dev/providers/ai-sdk-providers) with just a few lines of code.
+You need to provide a Hugging Face API token by setting the `HUGGINGFACE_API_KEY` environment variable:
+
+1. Get your token from: https://huggingface.co/settings/tokens
+2. Add to `.env.local`: `HUGGINGFACE_API_KEY=hf_your_token_here`
+
+See [HUGGINGFACE_SETUP.md](./HUGGINGFACE_SETUP.md) for detailed setup instructions.
+
+With the [AI SDK](https://ai-sdk.dev/docs/introduction), you can also switch to other providers like [OpenAI](https://openai.com), [Anthropic](https://anthropic.com), [Cohere](https://cohere.com/), and [many more](https://ai-sdk.dev/providers/ai-sdk-providers) with just a few lines of code.
 
 ## Deploy Your Own
 
