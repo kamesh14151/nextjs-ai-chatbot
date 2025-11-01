@@ -5,7 +5,6 @@ import {
   wrapLanguageModel,
 } from "ai";
 import { isTestEnvironment } from "../constants";
-import { offlineProvider } from "./providers-offline";
 
 // Check if we have a valid API key
 const hasValidAPIKey = process.env.OPENROUTER_API_KEY && 
@@ -55,4 +54,26 @@ export const myProvider = isTestEnvironment
           "artifact-model": openRouterProvider("openai/gpt-4o"),
         },
       })
-    : offlineProvider; // Use offline mock provider when no valid API key
+    : (() => {
+        // Fallback: Use a free model that requires an API key but will show proper error messages
+        const fallbackProvider = createOpenAI({
+          baseURL: "https://openrouter.ai/api/v1",
+          apiKey: process.env.OPENROUTER_API_KEY || "placeholder-key-will-error",
+          headers: {
+            "HTTP-Referer": "https://github.com/kamesh14151/nextjs-ai-chatbot",
+            "X-Title": "Next.js AI Chatbot",
+          },
+        });
+        
+        return customProvider({
+          languageModels: {
+            "chat-model": fallbackProvider("meta-llama/llama-3.2-3b-instruct:free"),
+            "chat-model-reasoning": wrapLanguageModel({
+              model: fallbackProvider("meta-llama/llama-3.2-3b-instruct:free"),
+              middleware: extractReasoningMiddleware({ tagName: "think" }),
+            }),
+            "title-model": fallbackProvider("meta-llama/llama-3.2-3b-instruct:free"),
+            "artifact-model": fallbackProvider("meta-llama/llama-3.2-3b-instruct:free"),
+          },
+        });
+      })();
