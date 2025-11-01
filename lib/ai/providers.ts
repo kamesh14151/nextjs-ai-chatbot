@@ -5,9 +5,15 @@ import {
   wrapLanguageModel,
 } from "ai";
 import { isTestEnvironment } from "../constants";
+import { offlineProvider } from "./providers-offline";
+
+// Check if we have a valid API key
+const hasValidAPIKey = process.env.OPENROUTER_API_KEY && 
+  process.env.OPENROUTER_API_KEY !== "your-new-openrouter-api-key-here" &&
+  process.env.OPENROUTER_API_KEY.startsWith("sk-or-v1-");
 
 // OpenRouter provider configuration
-const openRouterProvider = createOpenAI({
+const openRouterProvider = hasValidAPIKey ? createOpenAI({
   baseURL: "https://openrouter.ai/api/v1",
   apiKey: process.env.OPENROUTER_API_KEY,
   // Add custom headers for OpenRouter
@@ -15,7 +21,7 @@ const openRouterProvider = createOpenAI({
     "HTTP-Referer": "https://github.com/kamesh14151/nextjs-ai-chatbot",
     "X-Title": "Next.js AI Chatbot",
   },
-});
+}) : null;
 
 export const myProvider = isTestEnvironment
   ? (() => {
@@ -34,31 +40,19 @@ export const myProvider = isTestEnvironment
         },
       });
     })()
-  : customProvider({
-      languageModels: {
-        // Fallback to free models if no valid API key, otherwise use premium models
-        "chat-model": process.env.OPENROUTER_API_KEY && process.env.OPENROUTER_API_KEY !== "your-new-openrouter-api-key-here"
-          ? openRouterProvider("openai/gpt-4o")
-          : openRouterProvider("meta-llama/llama-3.2-3b-instruct:free"),
-        
-        // Reasoning model with proper chain-of-thought configuration
-        "chat-model-reasoning": wrapLanguageModel({
-          model: process.env.OPENROUTER_API_KEY && process.env.OPENROUTER_API_KEY !== "your-new-openrouter-api-key-here"
-            ? openRouterProvider("deepseek/deepseek-r1-distill-llama-70b")
-            : openRouterProvider("meta-llama/llama-3.2-3b-instruct:free"),
-          middleware: extractReasoningMiddleware({ 
-            tagName: "think",
-            // Enable reasoning output for better chain-of-thought display
+  : hasValidAPIKey && openRouterProvider
+    ? customProvider({
+        languageModels: {
+          // Premium models with valid API key
+          "chat-model": openRouterProvider("openai/gpt-4o"),
+          "chat-model-reasoning": wrapLanguageModel({
+            model: openRouterProvider("deepseek/deepseek-r1-distill-llama-70b"),
+            middleware: extractReasoningMiddleware({ 
+              tagName: "think",
+            }),
           }),
-        }),
-        
-        // Title and artifact models
-        "title-model": process.env.OPENROUTER_API_KEY && process.env.OPENROUTER_API_KEY !== "your-new-openrouter-api-key-here"
-          ? openRouterProvider("openai/gpt-4o-mini")
-          : openRouterProvider("meta-llama/llama-3.2-3b-instruct:free"),
-        
-        "artifact-model": process.env.OPENROUTER_API_KEY && process.env.OPENROUTER_API_KEY !== "your-new-openrouter-api-key-here"
-          ? openRouterProvider("openai/gpt-4o")
-          : openRouterProvider("meta-llama/llama-3.2-3b-instruct:free"),
-      },
-    });
+          "title-model": openRouterProvider("openai/gpt-4o-mini"),
+          "artifact-model": openRouterProvider("openai/gpt-4o"),
+        },
+      })
+    : offlineProvider; // Use offline mock provider when no valid API key
