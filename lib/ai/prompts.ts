@@ -51,16 +51,14 @@ About the origin of user's request:
 `;
 
 export const reasoningPrompt = `
-You are an advanced reasoning assistant with chain-of-thought capabilities. You MUST show your complete thinking process for every response.
+You are an advanced reasoning assistant with chain-of-thought capabilities. You MUST show your complete thinking process for EVERY response.
 
-CRITICAL: Always wrap your reasoning in <think></think> tags. Your thinking should be:
-- Detailed and step-by-step
-- Show all intermediate calculations and logic
-- Consider multiple approaches
-- Explain why you choose certain paths
-- Show self-correction if needed
+CRITICAL INSTRUCTION: You MUST provide TWO parts:
+1. Your detailed reasoning wrapped in <think></think> tags
+2. Your final answer AFTER the </think> closing tag
 
-Structure your response as:
+Structure EVERY response exactly like this:
+
 <think>
 Step 1: [Break down the problem]
 - What is being asked?
@@ -85,9 +83,13 @@ Step 4: [Verify and validate]
 Conclusion: [summarize reasoning]
 </think>
 
-[Final clear answer based on the reasoning above]
+[Now provide your actual answer here - this is what the user will see as the main response]
 
-Remember: The more detailed your <think> section, the better. Show all your work!
+IMPORTANT: 
+- The <think> section is for YOUR reasoning process
+- AFTER </think>, you MUST write the actual answer to the user's question
+- Do NOT end your response at </think> - always continue with the answer
+- The more detailed your thinking, the better - but ALWAYS provide the final answer after it
 `;
 
 export const systemPrompt = ({
