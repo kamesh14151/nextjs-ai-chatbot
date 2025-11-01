@@ -9,7 +9,12 @@ import { isTestEnvironment } from "../constants";
 // OpenRouter provider configuration
 const openRouterProvider = createOpenAI({
   baseURL: "https://openrouter.ai/api/v1",
-  apiKey: process.env.OPENROUTER_API_KEY || "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",
+  apiKey: process.env.OPENROUTER_API_KEY,
+  // Add custom headers for OpenRouter
+  headers: {
+    "HTTP-Referer": "https://github.com/kamesh14151/nextjs-ai-chatbot",
+    "X-Title": "Next.js AI Chatbot",
+  },
 });
 
 export const myProvider = isTestEnvironment
@@ -31,13 +36,29 @@ export const myProvider = isTestEnvironment
     })()
   : customProvider({
       languageModels: {
-        // Using free models that are more likely to work with basic API keys
-        "chat-model": openRouterProvider("meta-llama/llama-3.2-3b-instruct:free"),
+        // Fallback to free models if no valid API key, otherwise use premium models
+        "chat-model": process.env.OPENROUTER_API_KEY && process.env.OPENROUTER_API_KEY !== "your-new-openrouter-api-key-here"
+          ? openRouterProvider("openai/gpt-4o")
+          : openRouterProvider("meta-llama/llama-3.2-3b-instruct:free"),
+        
+        // Reasoning model with proper chain-of-thought configuration
         "chat-model-reasoning": wrapLanguageModel({
-          model: openRouterProvider("meta-llama/llama-3.2-3b-instruct:free"),
-          middleware: extractReasoningMiddleware({ tagName: "think" }),
+          model: process.env.OPENROUTER_API_KEY && process.env.OPENROUTER_API_KEY !== "your-new-openrouter-api-key-here"
+            ? openRouterProvider("deepseek/deepseek-r1-distill-llama-70b")
+            : openRouterProvider("meta-llama/llama-3.2-3b-instruct:free"),
+          middleware: extractReasoningMiddleware({ 
+            tagName: "think",
+            // Enable reasoning output for better chain-of-thought display
+          }),
         }),
-        "title-model": openRouterProvider("meta-llama/llama-3.2-3b-instruct:free"),
-        "artifact-model": openRouterProvider("meta-llama/llama-3.2-3b-instruct:free"),
+        
+        // Title and artifact models
+        "title-model": process.env.OPENROUTER_API_KEY && process.env.OPENROUTER_API_KEY !== "your-new-openrouter-api-key-here"
+          ? openRouterProvider("openai/gpt-4o-mini")
+          : openRouterProvider("meta-llama/llama-3.2-3b-instruct:free"),
+        
+        "artifact-model": process.env.OPENROUTER_API_KEY && process.env.OPENROUTER_API_KEY !== "your-new-openrouter-api-key-here"
+          ? openRouterProvider("openai/gpt-4o")
+          : openRouterProvider("meta-llama/llama-3.2-3b-instruct:free"),
       },
     });
