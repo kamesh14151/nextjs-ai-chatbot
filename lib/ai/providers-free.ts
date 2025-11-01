@@ -31,7 +31,7 @@ export const myProvider = isTestEnvironment
     })()
   : customProvider({
       languageModels: {
-        // Using free models that are more likely to work with basic API keys
+        // Using free models that are more likely to work
         "chat-model": openRouterProvider("meta-llama/llama-3.2-3b-instruct:free"),
         "chat-model-reasoning": wrapLanguageModel({
           model: openRouterProvider("meta-llama/llama-3.2-3b-instruct:free"),
